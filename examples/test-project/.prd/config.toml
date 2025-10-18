@@ -1,0 +1,3 @@
+project_name = "test-project"
+default_template = "default.md"
+strict_audit = true
