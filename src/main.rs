@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 use prd_assistant::{
-    commands::{audit_prd, generate_prd, init_project},
+    commands::{audit_prd, generate_prd, generate_tasks, init_project},
     error::Result,
 };
 use tracing::info;
@@ -37,6 +37,15 @@ enum Commands {
         /// Rules to use
         rules: Option<String>,
     },
+    /// Generate technical tasks from a PRD
+    GenerateTasks {
+        /// Project name
+        project: String,
+        /// Feature name
+        feature: String,
+        /// Optional PRD file path (if not provided, will look for generated PRD)
+        prd_file: Option<String>,
+    },
 }
 
 #[tokio::main]
@@ -59,5 +68,10 @@ async fn main() -> Result<()> {
             feature,
             rules,
         } => audit_prd(&project, &feature, rules.as_deref()).await,
+        Commands::GenerateTasks {
+            project,
+            feature,
+            prd_file,
+        } => generate_tasks(&project, &feature, prd_file.as_deref()).await,
     }
 }

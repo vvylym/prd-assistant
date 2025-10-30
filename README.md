@@ -7,6 +7,7 @@ A powerful CLI tool for generating, auditing, and managing Product Requirement D
 - **Initialize PRD Projects** - Set up new projects with templates and rules
 - **Generate PRDs** - Create comprehensive PRDs using AI with customizable templates
 - **Audit PRDs** - Review and improve existing PRDs with detailed feedback
+- **Generate Technical Tasks** - Create detailed implementation task lists from PRDs
 - **Template Support** - Multiple PRD templates (default, technical)
 - **Custom Rules** - Define custom audit rules for specialized reviews
 - **AI-Powered** - Uses Ollama with Gemma3n model for intelligent content generation
@@ -61,6 +62,16 @@ prd-assistant audit-prd my-awesome-project "User authentication system with logi
 prd-assistant audit-prd my-awesome-project "API rate limiting system" "Focus on security requirements and performance metrics"
 ```
 
+### 4. Generate Technical Tasks
+
+```bash
+# Generate tasks from auto-detected PRD
+prd-assistant generate-tasks my-awesome-project "User authentication system with login and registration"
+
+# Generate tasks from specific PRD file
+prd-assistant generate-tasks my-awesome-project "feature" "custom_prd.md"
+```
+
 ## Commands
 
 ### `init-project <PROJECT>`
@@ -103,6 +114,21 @@ Audit an existing PRD and provide detailed feedback.
 ```bash
 prd-assistant audit-prd my-project "User dashboard with analytics"
 prd-assistant audit-prd my-project "Microservices architecture" "Focus on scalability and security"
+```
+
+### `generate-tasks <PROJECT> <FEATURE> [PRD_FILE]`
+
+Generate technical tasks from a PRD for implementation planning.
+
+**Arguments:**
+- `PROJECT` - Project name
+- `FEATURE` - Feature name (used to find PRD if PRD_FILE not provided)
+- `PRD_FILE` - Optional path to specific PRD file
+
+**Examples:**
+```bash
+prd-assistant generate-tasks my-project "User dashboard with analytics"
+prd-assistant generate-tasks my-project "feature" "custom_prd.md"
 ```
 
 ## Project Structure
