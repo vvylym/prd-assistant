@@ -1,6 +1,6 @@
-use prd_assistant::commands::{init_project, generate_prd, audit_prd, generate_tasks};
+use prd_assistant::commands::{audit_prd, generate_prd, generate_tasks, init_project};
 mod common;
-use common::{create_test_project_context, create_mock_prd_content, TEST_MUTEX};
+use common::{TEST_MUTEX, create_mock_prd_content, create_test_project_context};
 use tempfile::TempDir;
 
 /// Integration tests for the complete PRD Assistant workflow
@@ -70,7 +70,7 @@ mod integration_tests {
 
         // Verify all files are created correctly
         let project_path = temp_dir.path().join(project_name);
-        
+
         // Check config file
         let config_path = project_path.join(".prd").join("config.toml");
         assert!(config_path.exists());
@@ -80,14 +80,26 @@ mod integration_tests {
         assert!(config_content.contains("true"));
 
         // Check template files
-        let default_template = project_path.join(".prd").join("templates").join("default.md");
-        let technical_template = project_path.join(".prd").join("templates").join("technical.md");
+        let default_template = project_path
+            .join(".prd")
+            .join("templates")
+            .join("default.md");
+        let technical_template = project_path
+            .join(".prd")
+            .join("templates")
+            .join("technical.md");
         assert!(default_template.exists());
         assert!(technical_template.exists());
 
         // Check rule files
-        let audit_rules = project_path.join(".prd").join("rules").join("audit_rules.md");
-        let generation_rules = project_path.join(".prd").join("rules").join("generation_rules.md");
+        let audit_rules = project_path
+            .join(".prd")
+            .join("rules")
+            .join("audit_rules.md");
+        let generation_rules = project_path
+            .join(".prd")
+            .join("rules")
+            .join("generation_rules.md");
         assert!(audit_rules.exists());
         assert!(generation_rules.exists());
 
@@ -115,7 +127,7 @@ mod integration_tests {
         // Test project context discovery
         let project_context = prd_assistant::project::ProjectContext::find_current().unwrap();
         assert!(project_context.is_some());
-        
+
         let context = project_context.unwrap();
         assert_eq!(context.config.project_name, project_name);
 
@@ -163,17 +175,26 @@ mod integration_tests {
         // Test generate_prd without project context
         let result = generate_prd(project_name, feature, None).await;
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), prd_assistant::error::Error::Project(_)));
+        assert!(matches!(
+            result.unwrap_err(),
+            prd_assistant::error::Error::Project(_)
+        ));
 
         // Test audit_prd without project context
         let result = audit_prd(project_name, feature, None).await;
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), prd_assistant::error::Error::Project(_)));
+        assert!(matches!(
+            result.unwrap_err(),
+            prd_assistant::error::Error::Project(_)
+        ));
 
         // Test generate_tasks without project context
         let result = generate_tasks(project_name, feature, None).await;
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), prd_assistant::error::Error::Project(_)));
+        assert!(matches!(
+            result.unwrap_err(),
+            prd_assistant::error::Error::Project(_)
+        ));
 
         // Restore original directory
         let _ = std::env::set_current_dir(original_dir);
@@ -202,8 +223,16 @@ mod integration_tests {
         assert!(temp_dir.path().join(project2_name).exists());
 
         // Verify they have separate configurations
-        let config1_path = temp_dir.path().join(project1_name).join(".prd").join("config.toml");
-        let config2_path = temp_dir.path().join(project2_name).join(".prd").join("config.toml");
+        let config1_path = temp_dir
+            .path()
+            .join(project1_name)
+            .join(".prd")
+            .join("config.toml");
+        let config2_path = temp_dir
+            .path()
+            .join(project2_name)
+            .join(".prd")
+            .join("config.toml");
 
         let config1_content = std::fs::read_to_string(&config1_path).unwrap();
         let config2_content = std::fs::read_to_string(&config2_path).unwrap();

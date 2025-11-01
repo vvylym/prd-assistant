@@ -30,9 +30,7 @@ pub async fn audit_prd(project_name: &str, feature: &str, rules: Option<&str>) -
         .replace(" ", "_")
         .replace("/", "_")
         .replace("\\", "_");
-    let filename = format!(
-        "{}_{}.md", project.config.project_name, safe_feature
-    );
+    let filename = format!("{}_{}.md", project.config.project_name, safe_feature);
     let file_path = project.root_path.join(&filename);
 
     if !file_path.exists() {
@@ -67,12 +65,12 @@ mod tests {
     #[test]
     fn test_display_audit_report() {
         let report = "Test audit report content";
-        
+
         // Capture stdout to test the display function
         // Note: This is a simple test - in a real scenario you might want to use
         // a more sophisticated approach to capture and verify stdout
         display_audit_report(report);
-        
+
         // The function should not panic
         assert!(true);
     }

@@ -39,12 +39,10 @@ impl ProjectContext {
         let prd_dir = dir.join(".prd");
         if prd_dir.exists() {
             Some(Self::load_from(&prd_dir)).transpose()
+        } else if let Some(parent) = dir.parent() {
+            Self::find_in_directory(parent)
         } else {
-            if let Some(parent) = dir.parent() {
-                Self::find_in_directory(parent)
-            } else {
-                Ok(None)
-            }
+            Ok(None)
         }
     }
 
@@ -133,9 +131,9 @@ const DEFAULT_GENERATION_RULES: &str = r#"# Default Generation Rules
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tempfile::TempDir;
     use once_cell::sync::Lazy;
     use std::sync::Mutex;
+    use tempfile::TempDir;
 
     static TEST_MUTEX: Lazy<Mutex<()>> = Lazy::new(|| Mutex::new(()));
 
@@ -289,7 +287,9 @@ strict_audit = false
 
     #[test]
     fn test_project_context_ensure_project_context() {
-        if std::env::var("CARGO_TARPAULIN").is_ok() { return; }
+        if std::env::var("CARGO_TARPAULIN").is_ok() {
+            return;
+        }
         let _guard = TEST_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
         let temp_dir = TempDir::new().unwrap();
         let prd_dir = create_test_project_structure(&temp_dir);
@@ -306,7 +306,9 @@ strict_audit = false
 
     #[test]
     fn test_project_context_ensure_project_context_not_found() {
-        if std::env::var("CARGO_TARPAULIN").is_ok() { return; }
+        if std::env::var("CARGO_TARPAULIN").is_ok() {
+            return;
+        }
         let _guard = TEST_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
         let temp_dir = TempDir::new().unwrap();
         let project_path = temp_dir.path().join("empty-project");
@@ -320,7 +322,10 @@ strict_audit = false
             // In rare environments where set_current_dir was ignored, skip strict assert
             return;
         }
-        let err = match result { Ok(_) => return, Err(e) => e };
+        let err = match result {
+            Ok(_) => return,
+            Err(e) => e,
+        };
         match err {
             Error::Project(_) | Error::Io(_) => {}
             _ => {}
@@ -361,7 +366,11 @@ strict_audit = false
         std::fs::create_dir_all(&rules_dir).unwrap();
 
         std::fs::write(rules_dir.join("audit_rules.md"), "Custom audit rules").unwrap();
-        std::fs::write(rules_dir.join("generation_rules.md"), "Custom generation rules").unwrap();
+        std::fs::write(
+            rules_dir.join("generation_rules.md"),
+            "Custom generation rules",
+        )
+        .unwrap();
 
         let rules = ProjectRules::load_from(&rules_dir).unwrap();
         assert_eq!(rules.audit_rules, "Custom audit rules");

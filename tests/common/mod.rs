@@ -1,7 +1,7 @@
-use std::path::PathBuf;
-use tempfile::TempDir;
 use once_cell::sync::Lazy;
+use std::path::PathBuf;
 use std::sync::Mutex;
+use tempfile::TempDir;
 
 pub static TEST_MUTEX: Lazy<Mutex<()>> = Lazy::new(|| Mutex::new(()));
 
@@ -27,10 +27,7 @@ pub fn create_test_project_context(
     let config_content = toml::to_string_pretty(&config)?;
     std::fs::write(prd_dir.join("config.toml"), config_content)?;
 
-    std::fs::write(
-        templates_dir.join("default.md"),
-        fixtures::DEFAULT_TEMPLATE,
-    )?;
+    std::fs::write(templates_dir.join("default.md"), fixtures::DEFAULT_TEMPLATE)?;
     std::fs::write(
         templates_dir.join("technical.md"),
         fixtures::TECHNICAL_TEMPLATE,
@@ -59,9 +56,7 @@ pub fn create_test_project_context(
     let _ = std::env::set_current_dir(original_dir);
 
     result.ok_or_else(|| {
-        prd_assistant::error::Error::Project(
-            "Failed to load project context".to_string(),
-        )
+        prd_assistant::error::Error::Project("Failed to load project context".to_string())
     })
 }
 
@@ -86,11 +81,13 @@ pub fn assert_file_content(file_path: &PathBuf, expected_content: &str) {
 
 pub fn assert_dir_exists(dir_path: &PathBuf) {
     assert!(dir_path.exists(), "Directory should exist: {:?}", dir_path);
-    assert!(dir_path.is_dir(), "Path should be a directory: {:?}", dir_path);
+    assert!(
+        dir_path.is_dir(),
+        "Path should be a directory: {:?}",
+        dir_path
+    );
 }
 
 pub fn create_mock_prd_content() -> String {
     fixtures::SAMPLE_PRD_CONTENT.to_string()
 }
-
-

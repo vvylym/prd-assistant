@@ -1,7 +1,0 @@
-exclude-files = [
-  "src/agent/*",
-  "src/main.rs"
-]
-
-timeout = 600
-

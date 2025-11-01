@@ -4,11 +4,7 @@ use crate::project::ProjectContext;
 use std::path::PathBuf;
 use tracing::info;
 
-pub async fn generate_prd(
-    project_name: &str,
-    feature: &str,
-    template: Option<&str>,
-) -> Result<()> {
+pub async fn generate_prd(project_name: &str, feature: &str, template: Option<&str>) -> Result<()> {
     info!(
         "Handling PRD generation for project: {} and feature: {}",
         project_name, feature
@@ -51,7 +47,7 @@ fn save_generated_prd(project: &ProjectContext, content: &str, feature: &str) ->
         .replace(" ", "_")
         .replace("/", "_")
         .replace("\\", "_");
-    
+
     // Truncate very long feature names to avoid filesystem limits
     // Most filesystems have a 255 character limit for filenames
     // We'll keep it under 200 to be safe, accounting for project name and extension
@@ -61,7 +57,7 @@ fn save_generated_prd(project: &ProjectContext, content: &str, feature: &str) ->
     } else {
         &safe_feature
     };
-    
+
     let filename = format!("{}_{}.md", project.config.project_name, truncated_feature);
     let output_path = project.root_path.join(&filename);
 
@@ -72,26 +68,26 @@ fn save_generated_prd(project: &ProjectContext, content: &str, feature: &str) ->
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::project::{ProjectConfig, ProjectContext};
     use tempfile::TempDir;
-    use crate::project::{ProjectContext, ProjectConfig};
 
     #[test]
     fn test_save_generated_prd_success() {
         let temp_dir = TempDir::new().unwrap();
         let project_context = make_project_context(&temp_dir);
-        
+
         let content = "Test PRD content";
         let feature = "test feature";
-        
+
         let result = save_generated_prd(&project_context, content, &feature);
         assert!(result.is_ok());
-        
+
         let output_path = result.unwrap();
         assert!(output_path.exists());
-        
+
         let saved_content = std::fs::read_to_string(&output_path).unwrap();
         assert_eq!(saved_content, content);
-        
+
         // Verify filename format
         let filename = output_path.file_name().unwrap().to_str().unwrap();
         assert!(filename.starts_with("test-project_"));
@@ -103,16 +99,16 @@ mod tests {
     fn test_save_generated_prd_filename_sanitization() {
         let temp_dir = TempDir::new().unwrap();
         let project_context = make_project_context(&temp_dir);
-        
+
         let content = "Test PRD content";
         let feature = "test/feature\\with spaces";
-        
+
         let result = save_generated_prd(&project_context, content, &feature);
         assert!(result.is_ok());
-        
+
         let output_path = result.unwrap();
         let filename = output_path.file_name().unwrap().to_str().unwrap();
-        
+
         // Verify special characters are replaced
         assert!(!filename.contains("/"));
         assert!(!filename.contains("\\"));
@@ -124,13 +120,13 @@ mod tests {
     fn test_save_generated_prd_empty_feature() {
         let temp_dir = TempDir::new().unwrap();
         let project_context = make_project_context(&temp_dir);
-        
+
         let content = "Test PRD content";
         let feature = "";
-        
+
         let result = save_generated_prd(&project_context, content, &feature);
         assert!(result.is_ok());
-        
+
         let output_path = result.unwrap();
         let filename = output_path.file_name().unwrap().to_str().unwrap();
         assert_eq!(filename, "test-project_.md");
@@ -140,13 +136,13 @@ mod tests {
     fn test_save_generated_prd_special_characters() {
         let temp_dir = TempDir::new().unwrap();
         let project_context = make_project_context(&temp_dir);
-        
+
         let content = "Test PRD content";
         let feature = "feature@#$%^&*()";
-        
+
         let result = save_generated_prd(&project_context, content, &feature);
         assert!(result.is_ok());
-        
+
         let output_path = result.unwrap();
         let filename = output_path.file_name().unwrap().to_str().unwrap();
         assert!(filename.contains("feature"));
@@ -156,19 +152,19 @@ mod tests {
     fn test_save_generated_prd_long_feature_name() {
         let temp_dir = TempDir::new().unwrap();
         let project_context = make_project_context(&temp_dir);
-        
+
         let content = "Test PRD content";
         let feature = "a".repeat(1000); // Very long feature name
-        
+
         let result = save_generated_prd(&project_context, content, &feature);
         assert!(result.is_ok());
-        
+
         let output_path = result.unwrap();
         assert!(output_path.exists());
-        
+
         let saved_content = std::fs::read_to_string(&output_path).unwrap();
         assert_eq!(saved_content, content);
-        
+
         // Verify that the filename was truncated
         let filename = output_path.file_name().unwrap().to_str().unwrap();
         assert!(filename.len() < 255); // Should be within filesystem limits
@@ -180,16 +176,16 @@ mod tests {
     fn test_save_generated_prd_unicode_feature() {
         let temp_dir = TempDir::new().unwrap();
         let project_context = make_project_context(&temp_dir);
-        
+
         let content = "Test PRD content";
         let feature = "测试功能"; // Chinese characters
-        
+
         let result = save_generated_prd(&project_context, content, &feature);
         assert!(result.is_ok());
-        
+
         let output_path = result.unwrap();
         assert!(output_path.exists());
-        
+
         let saved_content = std::fs::read_to_string(&output_path).unwrap();
         assert_eq!(saved_content, content);
     }
@@ -198,11 +194,11 @@ mod tests {
     fn test_save_generated_prd_write_permission_error() {
         let temp_dir = TempDir::new().unwrap();
         let project_context = make_project_context(&temp_dir);
-        
+
         // Create a read-only directory
         let read_only_dir = temp_dir.path().join("readonly");
         std::fs::create_dir(&read_only_dir).unwrap();
-        
+
         // On Unix systems, we can make the directory read-only
         #[cfg(unix)]
         {
@@ -211,19 +207,19 @@ mod tests {
             perms.set_mode(0o444); // Read-only
             std::fs::set_permissions(&read_only_dir, perms).unwrap();
         }
-        
+
         // Create a project context with read-only root
         let mut project_context = project_context.clone();
         project_context.root_path = read_only_dir;
-        
+
         let content = "Test PRD content";
         let feature = "test feature";
-        
+
         let result = save_generated_prd(&project_context, content, &feature);
         assert!(result.is_err());
         assert!(matches!(result.unwrap_err(), crate::error::Error::Io(_)));
     }
-    
+
     fn make_project_context(temp_dir: &TempDir) -> ProjectContext {
         let root = temp_dir.path().to_path_buf();
         // Minimal viable ProjectContext for file writing: root_path and config
@@ -234,8 +230,14 @@ mod tests {
                 default_template: "default.md".to_string(),
                 strict_audit: true,
             },
-            templates: crate::project::Templates { default: String::new(), technical: String::new() },
-            rules: crate::project::ProjectRules { audit_rules: String::new(), generation_rules: String::new() },
+            templates: crate::project::Templates {
+                default: String::new(),
+                technical: String::new(),
+            },
+            rules: crate::project::ProjectRules {
+                audit_rules: String::new(),
+                generation_rules: String::new(),
+            },
         }
     }
 }

@@ -28,20 +28,26 @@ mod tests {
         assert!(io_error.to_string().contains("File not found"));
 
         let project_error = Error::Project("Test project error".to_string());
-        assert_eq!(project_error.to_string(), "Project error: Test project error");
+        assert_eq!(
+            project_error.to_string(),
+            "Project error: Test project error"
+        );
 
         let agent_error = Error::AgentError("Test agent error".to_string());
         assert_eq!(agent_error.to_string(), "AI error: Test agent error");
 
         let template_error = Error::Template("Test template error".to_string());
-        assert_eq!(template_error.to_string(), "Template error: Test template error");
+        assert_eq!(
+            template_error.to_string(),
+            "Template error: Test template error"
+        );
     }
 
     #[test]
     fn test_error_from_io_error() {
         let io_error = io::Error::new(io::ErrorKind::PermissionDenied, "Permission denied");
         let prd_error: Error = io_error.into();
-        
+
         match prd_error {
             Error::Io(e) => {
                 assert_eq!(e.kind(), io::ErrorKind::PermissionDenied);
@@ -57,7 +63,7 @@ mod tests {
         let invalid_toml = "invalid = toml content with [unclosed bracket";
         let toml_error = toml::from_str::<toml::Value>(invalid_toml).unwrap_err();
         let prd_error: Error = toml_error.into();
-        
+
         match prd_error {
             Error::TomlDe(e) => {
                 assert!(!e.to_string().is_empty());

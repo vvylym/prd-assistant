@@ -1,8 +1,8 @@
-use prd_assistant::commands::{init_project, generate_prd, audit_prd, generate_tasks};
+use prd_assistant::commands::{audit_prd, generate_prd, generate_tasks, init_project};
 mod common;
 use common::TEST_MUTEX;
-use tempfile::TempDir;
 use std::process::Command;
+use tempfile::TempDir;
 
 /// End-to-end tests that test the complete CLI workflow
 mod e2e_tests {
@@ -18,7 +18,9 @@ mod e2e_tests {
             .output()
             .expect("Failed to execute command");
 
-        if !output.status.success() { return; }
+        if !output.status.success() {
+            return;
+        }
         let stdout = String::from_utf8_lossy(&output.stdout);
         assert!(stdout.contains("prd-assistant"));
         assert!(stdout.contains("Commands:"));
@@ -37,7 +39,9 @@ mod e2e_tests {
             .output()
             .expect("Failed to execute command");
 
-        if !output.status.success() { return; }
+        if !output.status.success() {
+            return;
+        }
         let stdout = String::from_utf8_lossy(&output.stdout);
         assert!(stdout.contains("Initialize a new PRD project"));
         assert!(stdout.contains("PROJECT"));
@@ -52,7 +56,9 @@ mod e2e_tests {
             .output()
             .expect("Failed to execute command");
 
-        if !output.status.success() { return; }
+        if !output.status.success() {
+            return;
+        }
         let stdout = String::from_utf8_lossy(&output.stdout);
         assert!(stdout.contains("Generate a new PRD"));
         assert!(stdout.contains("PROJECT"));
@@ -69,7 +75,9 @@ mod e2e_tests {
             .output()
             .expect("Failed to execute command");
 
-        if !output.status.success() { return; }
+        if !output.status.success() {
+            return;
+        }
         let stdout = String::from_utf8_lossy(&output.stdout);
         assert!(stdout.contains("Audit an existing PRD"));
         assert!(stdout.contains("PROJECT"));
@@ -102,7 +110,9 @@ mod e2e_tests {
 
         // Change to temp directory (best-effort)
         let original_dir = std::env::current_dir().ok();
-        if std::env::set_current_dir(temp_dir.path()).is_err() { return; }
+        if std::env::set_current_dir(temp_dir.path()).is_err() {
+            return;
+        }
 
         // Test init-project command
         let result = init_project(project_name).await;
@@ -124,7 +134,9 @@ mod e2e_tests {
         assert!(config_content.contains("true"));
 
         // Restore original directory
-        if let Some(dir) = original_dir { let _ = std::env::set_current_dir(dir); }
+        if let Some(dir) = original_dir {
+            let _ = std::env::set_current_dir(dir);
+        }
     }
 
     #[tokio::test]
@@ -135,7 +147,9 @@ mod e2e_tests {
         let feature = "test feature";
 
         let original_dir = std::env::current_dir().ok();
-        if std::env::set_current_dir(temp_dir.path()).is_err() { return; }
+        if std::env::set_current_dir(temp_dir.path()).is_err() {
+            return;
+        }
 
         // Test commands without project context
         let result = generate_prd(project_name, feature, None).await;
@@ -148,7 +162,9 @@ mod e2e_tests {
         assert!(result.is_err());
 
         // Restore original directory
-        if let Some(dir) = original_dir { let _ = std::env::set_current_dir(dir); }
+        if let Some(dir) = original_dir {
+            let _ = std::env::set_current_dir(dir);
+        }
     }
 
     #[tokio::test]
@@ -158,7 +174,9 @@ mod e2e_tests {
         let project_name = "file-ops-test-project";
 
         let original_dir = std::env::current_dir().ok();
-        if std::env::set_current_dir(temp_dir.path()).is_err() { return; }
+        if std::env::set_current_dir(temp_dir.path()).is_err() {
+            return;
+        }
 
         // Initialize project
         let result = init_project(project_name).await;
@@ -166,7 +184,7 @@ mod e2e_tests {
 
         // Test file creation and reading
         let project_path = temp_dir.path().join(project_name);
-        
+
         // Create a test PRD file
         let prd_content = "# Test PRD\n\nThis is a test PRD content.";
         let prd_filename = format!("{}_{}.md", project_name, "test_feature");
@@ -185,7 +203,9 @@ mod e2e_tests {
         assert!(special_path.exists());
 
         // Restore original directory
-        if let Some(dir) = original_dir { let _ = std::env::set_current_dir(dir); }
+        if let Some(dir) = original_dir {
+            let _ = std::env::set_current_dir(dir);
+        }
     }
 
     #[tokio::test]
@@ -195,7 +215,9 @@ mod e2e_tests {
         let project_name = "context-test-project";
 
         let original_dir = std::env::current_dir().ok();
-        if std::env::set_current_dir(temp_dir.path()).is_err() { return; }
+        if std::env::set_current_dir(temp_dir.path()).is_err() {
+            return;
+        }
 
         // Initialize project
         let result = init_project(project_name).await;
@@ -205,20 +227,29 @@ mod e2e_tests {
         let project_path = temp_dir.path().join(project_name);
         let prd_dir = project_path.join(".prd");
         let config_content = std::fs::read_to_string(prd_dir.join("config.toml")).unwrap();
-        let config: prd_assistant::project::ProjectConfig = toml::from_str(&config_content).unwrap();
-        let templates = prd_assistant::project::Templates::load_from(&prd_dir.join("templates")).unwrap();
-        let audit_rules = std::fs::read_to_string(prd_dir.join("rules").join("audit_rules.md")).unwrap();
-        let generation_rules = std::fs::read_to_string(prd_dir.join("rules").join("generation_rules.md")).unwrap();
+        let config: prd_assistant::project::ProjectConfig =
+            toml::from_str(&config_content).unwrap();
+        let templates =
+            prd_assistant::project::Templates::load_from(&prd_dir.join("templates")).unwrap();
+        let audit_rules =
+            std::fs::read_to_string(prd_dir.join("rules").join("audit_rules.md")).unwrap();
+        let generation_rules =
+            std::fs::read_to_string(prd_dir.join("rules").join("generation_rules.md")).unwrap();
         let context = prd_assistant::project::ProjectContext {
             root_path: project_path.clone(),
             config,
             templates,
-            rules: prd_assistant::project::ProjectRules { audit_rules, generation_rules },
+            rules: prd_assistant::project::ProjectRules {
+                audit_rules,
+                generation_rules,
+            },
         };
         assert_eq!(context.config.project_name, project_name);
 
         // Restore original directory
-        if let Some(dir) = original_dir { let _ = std::env::set_current_dir(dir); }
+        if let Some(dir) = original_dir {
+            let _ = std::env::set_current_dir(dir);
+        }
     }
 
     #[tokio::test]
@@ -237,26 +268,36 @@ mod e2e_tests {
         // Test config loading and parsing
         let project_path = temp_dir.path().join(project_name);
         let config_path = project_path.join(".prd").join("config.toml");
-        
+
         let config_content = std::fs::read_to_string(&config_path).unwrap();
-        let config: prd_assistant::project::ProjectConfig = toml::from_str(&config_content).unwrap();
-        
+        let config: prd_assistant::project::ProjectConfig =
+            toml::from_str(&config_content).unwrap();
+
         assert_eq!(config.project_name, project_name);
         assert_eq!(config.default_template, "default.md");
         assert!(config.strict_audit);
 
         // Test template loading
-        let templates = prd_assistant::project::Templates::load_from(&project_path.join(".prd").join("templates")).unwrap();
+        let templates = prd_assistant::project::Templates::load_from(
+            &project_path.join(".prd").join("templates"),
+        )
+        .unwrap();
         assert!(!templates.default.is_empty());
         assert!(!templates.technical.is_empty());
 
         // Test rules loading by reading files directly
-        let audit_rules_path = project_path.join(".prd").join("rules").join("audit_rules.md");
-        let generation_rules_path = project_path.join(".prd").join("rules").join("generation_rules.md");
-        
+        let audit_rules_path = project_path
+            .join(".prd")
+            .join("rules")
+            .join("audit_rules.md");
+        let generation_rules_path = project_path
+            .join(".prd")
+            .join("rules")
+            .join("generation_rules.md");
+
         let audit_rules = std::fs::read_to_string(&audit_rules_path).unwrap();
         let generation_rules = std::fs::read_to_string(&generation_rules_path).unwrap();
-        
+
         assert!(!audit_rules.is_empty());
         assert!(!generation_rules.is_empty());
 

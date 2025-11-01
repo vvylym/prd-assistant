@@ -97,5 +97,3 @@ This feature provides user authentication capabilities for the test project.
 - Should we implement remember me functionality?
 - What password requirements should we enforce?
 "#;
-
-

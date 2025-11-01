@@ -96,9 +96,9 @@ const DEFAULT_GENERATION_RULES: &str = r#"# Generation Rules
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tempfile::TempDir;
     use once_cell::sync::Lazy;
     use std::sync::Mutex;
+    use tempfile::TempDir;
 
     static TEST_MUTEX: Lazy<Mutex<()>> = Lazy::new(|| Mutex::new(()));
 
@@ -134,7 +134,9 @@ mod tests {
         let _ = init_project(project_name).await;
 
         // Restore original directory
-        if let Some(dir) = original_dir { let _ = std::env::set_current_dir(dir); }
+        if let Some(dir) = original_dir {
+            let _ = std::env::set_current_dir(dir);
+        }
     }
 
     #[tokio::test]
@@ -194,7 +196,9 @@ mod tests {
         let _ = std::env::set_current_dir(temp_dir.path());
 
         let result = init_project(project_name).await;
-        if let Err(e) = result { panic!("init failed: {}", e); }
+        if let Err(e) = result {
+            panic!("init failed: {}", e);
+        }
 
         // Restore original directory
         let _ = std::env::set_current_dir(original_dir);
