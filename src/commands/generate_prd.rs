@@ -1,4 +1,4 @@
-use crate::agent::PrdAgent;
+use crate::ai::PrdAgent;
 use crate::error::Result;
 use crate::project::ProjectContext;
 use std::path::PathBuf;

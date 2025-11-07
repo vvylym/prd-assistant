@@ -1,9 +1,9 @@
-pub mod audit;
-pub mod generate;
+pub mod audit_prd;
+pub mod generate_prd;
 pub mod generate_tasks;
-pub mod init;
+pub mod init_project;
 
-pub use audit::audit_prd;
-pub use generate::generate_prd;
+pub use audit_prd::audit_prd;
+pub use generate_prd::generate_prd;
 pub use generate_tasks::generate_tasks;
-pub use init::init_project;
+pub use init_project::init_project;
